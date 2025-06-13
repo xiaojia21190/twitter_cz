@@ -70,7 +70,7 @@ export class PuppeteerNotificationService {
       {
         name: "auth_token",
         value: authToken,
-        domain: ".twitter.com",
+        domain: ".x.com",
         path: "/",
         httpOnly: true,
         secure: true,
@@ -86,7 +86,7 @@ export class PuppeteerNotificationService {
           cookies.push({
             name: name.trim(),
             value: value.trim(),
-            domain: ".twitter.com",
+            domain: ".x.com",
             path: "/",
             httpOnly: true,
             secure: true,
@@ -118,7 +118,7 @@ export class PuppeteerNotificationService {
   /**
    * 导航到指定页面
    */
-  async navigateToPage(url = "https://twitter.com/messages") {
+  async navigateToPage(url = "https://x.com/messages") {
     if (!this.isInitialized) {
       await this.initialize();
     }

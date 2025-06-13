@@ -32,8 +32,7 @@ export class PuppeteerCookieExtractor {
     console.log("正在启动浏览器获取cookie参数...");
 
     try {
-      await this.initializeBrowser();
-      await this.injectAuthToken(authToken);
+      await this.initializeBrowser(authToken);
       const cookies = await this.extractAllCookies();
 
       console.log("✅ 成功获取到所有cookie参数");
@@ -50,7 +49,7 @@ export class PuppeteerCookieExtractor {
   /**
    * 初始化浏览器和页面
    */
-  async initializeBrowser() {
+  async initializeBrowser(authToken) {
     const launchOptions = {
       headless: this.puppeteerConfig.headless !== false ? this.config.headless : this.puppeteerConfig.headless,
       args: this.puppeteerConfig.args || ["--disable-gpu", "--disable-dev-shm-usage", "--disable-setuid-sandbox", "--no-first-run", "--no-sandbox", "--no-zygote", "--start-maximized", "--use-gl=swiftshader", "--disable-gl-drawing-for-tests"],
@@ -71,6 +70,15 @@ export class PuppeteerCookieExtractor {
     this.page = await context.newPage();
     this.page.setDefaultNavigationTimeout(this.puppeteerConfig.timeout || this.config.timeout);
 
+    await context.setCookie({
+      name: "auth_token",
+      value: authToken,
+      domain: ".x.com",
+      secure: true,
+      httpOnly: true,
+      sameSite: "None",
+    });
+
     // 反检测设置
     await this.page.evaluateOnNewDocument(() => {
       const newProto = navigator.__proto__;
@@ -85,24 +93,6 @@ export class PuppeteerCookieExtractor {
     });
 
     await this.page.setViewport({ width: 1280, height: 800 });
-  }
-
-  /**
-   * 注入auth_token到浏览器
-   * @param {string} authToken - auth_token值
-   */
-  async injectAuthToken(authToken) {
-    console.log("正在向浏览器注入 auth_token...");
-
-    const context = this.browser.defaultBrowserContext();
-    await context.setCookie({
-      name: "auth_token",
-      value: authToken,
-      domain: ".x.com",
-      secure: true,
-      httpOnly: true,
-      sameSite: "None",
-    });
   }
 
   /**
