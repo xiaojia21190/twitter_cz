@@ -1,5 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
+import { ProxyFormatter } from "../utils/ProxyFormatter.js";
 
 /**
  * 账号配置管理器
@@ -51,13 +52,23 @@ export class AccountManager {
       throw new Error(`账号ID ${accountData.id} 已存在`);
     }
 
+    // 处理代理URL格式转换
+    let processedProxyUrl = accountData.proxyUrl || "http://127.0.0.1:7890";
+    if (accountData.proxyUrl) {
+      try {
+        processedProxyUrl = ProxyFormatter.toStandardUrl(accountData.proxyUrl);
+      } catch (error) {
+        throw new Error(`代理格式错误: ${error.message}`);
+      }
+    }
+
     // 添加默认字段
     const newAccount = {
       id: accountData.id,
       authToken: accountData.authToken,
       enabled: accountData.enabled !== false,
       polling_interval: accountData.polling_interval || 30000,
-      proxyUrl: accountData.proxyUrl || "http://127.0.0.1:7890",
+      proxyUrl: processedProxyUrl,
       saveEnhancedToken: accountData.saveEnhancedToken !== false,
       ...accountData,
     };
@@ -74,6 +85,15 @@ export class AccountManager {
    */
   async updateAccount(accountId, updates) {
     const config = await this.loadConfig();
+
+    // 处理代理URL格式转换
+    if (updates.proxyUrl) {
+      try {
+        updates.proxyUrl = ProxyFormatter.toStandardUrl(updates.proxyUrl);
+      } catch (error) {
+        throw new Error(`代理格式错误: ${error.message}`);
+      }
+    }
 
     // 更新群组监控账号
     if (config.groupNotificationAccount && config.groupNotificationAccount.id === accountId) {
@@ -138,6 +158,16 @@ export class AccountManager {
       throw new Error(`群组监控账号ID ${groupData.id} 已存在`);
     }
 
+    // 处理代理URL格式转换
+    let processedProxyUrl = groupData.proxyUrl || "http://127.0.0.1:7890";
+    if (groupData.proxyUrl) {
+      try {
+        processedProxyUrl = ProxyFormatter.toStandardUrl(groupData.proxyUrl);
+      } catch (error) {
+        throw new Error(`代理格式错误: ${error.message}`);
+      }
+    }
+
     // 添加默认字段
     const newGroup = {
       id: groupData.id,
@@ -150,7 +180,7 @@ export class AccountManager {
       groupMessageUrl: groupData.groupMessageUrl,
       groupName: groupData.groupName || `群组 ${groupData.id}`,
       priority: groupData.priority || 999,
-      proxyUrl: groupData.proxyUrl || "http://127.0.0.1:7890",
+      proxyUrl: processedProxyUrl,
       saveEnhancedToken: groupData.saveEnhancedToken !== false,
       ...groupData,
     };
@@ -170,6 +200,15 @@ export class AccountManager {
 
     if (!config.groupMonitorAccounts) {
       throw new Error("未配置群组监控账号");
+    }
+
+    // 处理代理URL格式转换
+    if (updates.proxyUrl) {
+      try {
+        updates.proxyUrl = ProxyFormatter.toStandardUrl(updates.proxyUrl);
+      } catch (error) {
+        throw new Error(`代理格式错误: ${error.message}`);
+      }
     }
 
     const groupIndex = config.groupMonitorAccounts.findIndex((group) => group.id === groupId);
@@ -284,8 +323,8 @@ export class AccountManager {
       errors.push("轮询间隔必须在10秒到5分钟之间");
     }
 
-    if (accountData.proxyUrl && !this.isValidUrl(accountData.proxyUrl)) {
-      errors.push("代理URL格式不正确");
+    if (accountData.proxyUrl && !ProxyFormatter.isValidProxy(accountData.proxyUrl)) {
+      errors.push("代理格式不正确，支持格式: http://host:port 或 host:port:username:password");
     }
 
     return errors;

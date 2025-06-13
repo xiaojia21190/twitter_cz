@@ -17,6 +17,9 @@ importers:
       fs-extra:
         specifier: ^11.2.0
         version: 11.3.0
+      https-proxy-agent:
+        specifier: ^7.0.6
+        version: 7.0.6
       node-cron:
         specifier: ^3.0.3
         version: 3.0.3

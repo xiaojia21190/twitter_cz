@@ -20,6 +20,8 @@
     "proxy:list": "node src/cli/proxy-manager.js list",
     "proxy:set-all": "node src/cli/proxy-manager.js set-all",
     "proxy:test": "node src/cli/proxy-manager.js test",
+    "proxy:convert": "node src/cli/proxy-manager.js convert",
+    "proxy:examples": "node src/cli/proxy-manager.js examples",
     "chrome": "node src/cli/chrome-setup.js",
     "chrome:detect": "node src/cli/chrome-setup.js detect",
     "chrome:auto": "node src/cli/chrome-setup.js auto",
@@ -41,6 +43,7 @@
     "axios": "^1.6.2",
     "dotenv": "^16.3.1",
     "fs-extra": "^11.2.0",
+    "https-proxy-agent": "^7.0.6",
     "node-cron": "^3.0.3",
     "puppeteer-core": "^24.10.1",
     "rettiwt-api": "^5.0.1"

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { AccountManager } from "../config/AccountManager.js";
+import { ProxyFormatter } from "../utils/ProxyFormatter.js";
 
 /**
  * 代理配置管理工具
@@ -28,22 +29,33 @@ Twitter监控系统 - 代理配置管理工具
   test <proxyUrl>         测试代理连接
   clear <id>              清除指定账号的代理配置
   clear-all               清除所有账号的代理配置
+  convert <proxy>         转换代理格式
+  examples                显示支持的代理格式示例
 
 示例:
   # 列出所有代理配置
   node src/cli/proxy-manager.js list
 
-  # 为所有账号设置代理
+  # 为所有账号设置代理（标准格式）
   node src/cli/proxy-manager.js set-all "http://127.0.0.1:7890"
 
+  # 为所有账号设置代理（IP:端口:用户名:密码格式）
+  node src/cli/proxy-manager.js set-all "142.173.139.108:15308:E3oeIbOnIC:qIEmVMinlF"
+
   # 为特定评论账号设置代理
-  node src/cli/proxy-manager.js set-account account_1 "http://127.0.0.1:7890"
+  node src/cli/proxy-manager.js set-account account_1 "192.168.1.100:8080:user:pass"
 
   # 为特定群组账号设置代理
-  node src/cli/proxy-manager.js set-group group_monitor_1 "http://127.0.0.1:7890"
+  node src/cli/proxy-manager.js set-group group_monitor_1 "http://proxy.example.com:8080"
 
   # 测试代理连接
-  node src/cli/proxy-manager.js test "http://127.0.0.1:7890"
+  node src/cli/proxy-manager.js test "142.173.139.108:15308:E3oeIbOnIC:qIEmVMinlF"
+
+  # 转换代理格式
+  node src/cli/proxy-manager.js convert "142.173.139.108:15308:E3oeIbOnIC:qIEmVMinlF"
+
+  # 查看支持的格式示例
+  node src/cli/proxy-manager.js examples
 `);
   }
 
@@ -53,16 +65,16 @@ Twitter监控系统 - 代理配置管理工具
   async listProxyConfig() {
     try {
       const accounts = await this.accountManager.listAccounts();
-      
+
       console.log("\n=== 代理配置列表 ===");
-      
+
       // 群组监控账号代理配置
       if (accounts.groupAccounts && accounts.groupAccounts.length > 0) {
         console.log("\n📡 群组监控账号:");
         accounts.groupAccounts.forEach((group, index) => {
-          console.log(`${index + 1}. ${group.id} (${group.groupName || 'Unknown'})`);
-          console.log(`   代理: ${group.proxyUrl || '❌ 未设置'}`);
-          console.log(`   状态: ${group.enabled ? '✅ 启用' : '❌ 禁用'}`);
+          console.log(`${index + 1}. ${group.id} (${group.groupName || "Unknown"})`);
+          console.log(`   代理: ${group.proxyUrl ? ProxyFormatter.formatForDisplay(group.proxyUrl) : "❌ 未设置"}`);
+          console.log(`   状态: ${group.enabled ? "✅ 启用" : "❌ 禁用"}`);
           console.log("");
         });
       }
@@ -72,24 +84,21 @@ Twitter监控系统 - 代理配置管理工具
         console.log("💬 评论账号:");
         accounts.commentAccounts.forEach((account, index) => {
           console.log(`${index + 1}. ${account.id}`);
-          console.log(`   代理: ${account.proxyUrl || '❌ 未设置'}`);
-          console.log(`   状态: ${account.enabled ? '✅ 启用' : '❌ 禁用'}`);
+          console.log(`   代理: ${account.proxyUrl ? ProxyFormatter.formatForDisplay(account.proxyUrl) : "❌ 未设置"}`);
+          console.log(`   状态: ${account.enabled ? "✅ 启用" : "❌ 禁用"}`);
           console.log("");
         });
       }
 
       // 统计信息
       const totalAccounts = (accounts.groupAccounts?.length || 0) + (accounts.commentAccounts?.length || 0);
-      const accountsWithProxy = [
-        ...(accounts.groupAccounts || []),
-        ...(accounts.commentAccounts || [])
-      ].filter(acc => acc.proxyUrl).length;
+      const accountsWithProxy = [...(accounts.groupAccounts || []), ...(accounts.commentAccounts || [])].filter((acc) => acc.proxyUrl).length;
 
       console.log("📊 代理配置统计:");
       console.log(`   总账号数: ${totalAccounts}`);
       console.log(`   已配置代理: ${accountsWithProxy}`);
       console.log(`   未配置代理: ${totalAccounts - accountsWithProxy}`);
-      
+
       if (accountsWithProxy < totalAccounts) {
         console.log("\n💡 建议为所有账号配置代理以提高稳定性");
       }
@@ -103,13 +112,18 @@ Twitter监控系统 - 代理配置管理工具
    */
   async setAllProxy(proxyUrl) {
     try {
-      if (!this.isValidProxyUrl(proxyUrl)) {
-        console.error("❌ 代理URL格式不正确");
+      if (!ProxyFormatter.isValidProxy(proxyUrl)) {
+        console.error("❌ 代理格式不正确");
+        console.log("支持的格式:");
+        const examples = ProxyFormatter.getExamples();
+        Object.entries(examples).forEach(([name, example]) => {
+          console.log(`   ${name}: ${example}`);
+        });
         return;
       }
 
       console.log(`🔧 为所有账号设置代理: ${proxyUrl}`);
-      
+
       const accounts = await this.accountManager.listAccounts();
       let successCount = 0;
       let errorCount = 0;
@@ -155,8 +169,8 @@ Twitter监控系统 - 代理配置管理工具
    */
   async setAccountProxy(accountId, proxyUrl) {
     try {
-      if (!this.isValidProxyUrl(proxyUrl)) {
-        console.error("❌ 代理URL格式不正确");
+      if (!ProxyFormatter.isValidProxy(proxyUrl)) {
+        console.error("❌ 代理格式不正确");
         return;
       }
 
@@ -172,8 +186,8 @@ Twitter监控系统 - 代理配置管理工具
    */
   async setGroupProxy(groupId, proxyUrl) {
     try {
-      if (!this.isValidProxyUrl(proxyUrl)) {
-        console.error("❌ 代理URL格式不正确");
+      if (!ProxyFormatter.isValidProxy(proxyUrl)) {
+        console.error("❌ 代理格式不正确");
         return;
       }
 
@@ -189,40 +203,32 @@ Twitter监控系统 - 代理配置管理工具
    */
   async testProxy(proxyUrl) {
     try {
-      if (!this.isValidProxyUrl(proxyUrl)) {
-        console.error("❌ 代理URL格式不正确");
-        return;
-      }
+      console.log(`🔍 测试代理连接: ${ProxyFormatter.formatForDisplay(proxyUrl)}`);
 
-      console.log(`🔍 测试代理连接: ${proxyUrl}`);
-      
-      const axios = await import('axios');
-      const { HttpsProxyAgent } = await import('https-proxy-agent');
-      
-      const agent = new HttpsProxyAgent(proxyUrl);
-      
-      const startTime = Date.now();
-      const response = await axios.default.get('https://httpbin.org/ip', {
-        httpsAgent: agent,
-        timeout: 10000
-      });
-      const endTime = Date.now();
-      
-      console.log("✅ 代理连接测试成功!");
-      console.log(`   响应时间: ${endTime - startTime}ms`);
-      console.log(`   出口IP: ${response.data.origin}`);
-    } catch (error) {
-      console.error("❌ 代理连接测试失败:", error.message);
-      
-      if (error.code === 'ECONNREFUSED') {
-        console.log("💡 建议检查:");
-        console.log("   • 代理服务是否正在运行");
-        console.log("   • 代理地址和端口是否正确");
-      } else if (error.code === 'ETIMEDOUT') {
-        console.log("💡 建议检查:");
-        console.log("   • 网络连接是否正常");
-        console.log("   • 代理服务器是否响应");
+      const result = await ProxyFormatter.testProxyConnection(proxyUrl);
+
+      if (result.success) {
+        console.log("✅ 代理连接测试成功!");
+        console.log(`   响应时间: ${result.responseTime}ms`);
+        console.log(`   状态码: ${result.statusCode}`);
+        if (result.data && result.data.origin) {
+          console.log(`   出口IP: ${result.data.origin}`);
+        }
+      } else {
+        console.error("❌ 代理连接测试失败:", result.error);
+
+        if (result.code === "ECONNREFUSED") {
+          console.log("💡 建议检查:");
+          console.log("   • 代理服务是否正在运行");
+          console.log("   • 代理地址和端口是否正确");
+        } else if (result.code === "ETIMEDOUT") {
+          console.log("💡 建议检查:");
+          console.log("   • 网络连接是否正常");
+          console.log("   • 代理服务器是否响应");
+        }
       }
+    } catch (error) {
+      console.error("❌ 测试过程出错:", error.message);
     }
   }
 
@@ -232,10 +238,10 @@ Twitter监控系统 - 代理配置管理工具
   async clearProxy(accountId) {
     try {
       const accounts = await this.accountManager.listAccounts();
-      
+
       // 检查是否为群组账号
-      const isGroupAccount = accounts.groupAccounts?.some(group => group.id === accountId);
-      
+      const isGroupAccount = accounts.groupAccounts?.some((group) => group.id === accountId);
+
       if (isGroupAccount) {
         await this.accountManager.updateGroupMonitorAccount(accountId, { proxyUrl: null });
         console.log(`✅ 群组账号 ${accountId} 的代理配置已清除`);
@@ -254,7 +260,7 @@ Twitter监控系统 - 代理配置管理工具
   async clearAllProxy() {
     try {
       console.log("🧹 清除所有账号的代理配置...");
-      
+
       const accounts = await this.accountManager.listAccounts();
       let successCount = 0;
       let errorCount = 0;
@@ -294,15 +300,45 @@ Twitter监控系统 - 代理配置管理工具
   }
 
   /**
-   * 验证代理URL格式
+   * 转换代理格式
    */
-  isValidProxyUrl(proxyUrl) {
+  async convertProxy(proxyString) {
     try {
-      const url = new URL(proxyUrl);
-      return url.protocol === 'http:' || url.protocol === 'https:';
+      const standardUrl = ProxyFormatter.toStandardUrl(proxyString);
+      const parsed = ProxyFormatter.parseProxy(proxyString);
+
+      console.log("🔄 代理格式转换结果:");
+      console.log(`   原始格式: ${proxyString}`);
+      console.log(`   标准格式: ${standardUrl}`);
+      console.log(`   解析信息:`);
+      console.log(`     协议: ${parsed.protocol}`);
+      console.log(`     主机: ${parsed.host}`);
+      console.log(`     端口: ${parsed.port}`);
+      console.log(`     用户名: ${parsed.username || "无"}`);
+      console.log(`     密码: ${parsed.password ? "***" : "无"}`);
     } catch (error) {
-      return false;
+      console.error("❌ 代理格式转换失败:", error.message);
     }
+  }
+
+  /**
+   * 显示代理格式示例
+   */
+  async showExamples() {
+    console.log("📋 支持的代理格式示例:");
+    console.log("");
+
+    const examples = ProxyFormatter.getExamples();
+    Object.entries(examples).forEach(([name, example]) => {
+      console.log(`${name}:`);
+      console.log(`   ${example}`);
+      console.log("");
+    });
+
+    console.log("💡 说明:");
+    console.log("   • 所有格式都会自动转换为标准URL格式");
+    console.log("   • IP:端口:用户名:密码 格式会自动添加 http:// 前缀");
+    console.log("   • 用户名和密码会自动进行URL编码");
   }
 
   /**
@@ -310,8 +346,8 @@ Twitter监控系统 - 代理配置管理工具
    */
   async run() {
     const args = process.argv.slice(2);
-    
-    if (args.length === 0 || args[0] === 'help' || args[0] === '--help' || args[0] === '-h') {
+
+    if (args.length === 0 || args[0] === "help" || args[0] === "--help" || args[0] === "-h") {
       this.showHelp();
       return;
     }
@@ -320,11 +356,11 @@ Twitter监控系统 - 代理配置管理工具
 
     try {
       switch (command) {
-        case 'list':
+        case "list":
           await this.listProxyConfig();
           break;
 
-        case 'set-all':
+        case "set-all":
           if (args.length < 2) {
             console.error("❌ 用法: set-all <proxyUrl>");
             return;
@@ -332,7 +368,7 @@ Twitter监控系统 - 代理配置管理工具
           await this.setAllProxy(args[1]);
           break;
 
-        case 'set-account':
+        case "set-account":
           if (args.length < 3) {
             console.error("❌ 用法: set-account <accountId> <proxyUrl>");
             return;
@@ -340,7 +376,7 @@ Twitter监控系统 - 代理配置管理工具
           await this.setAccountProxy(args[1], args[2]);
           break;
 
-        case 'set-group':
+        case "set-group":
           if (args.length < 3) {
             console.error("❌ 用法: set-group <groupId> <proxyUrl>");
             return;
@@ -348,7 +384,7 @@ Twitter监控系统 - 代理配置管理工具
           await this.setGroupProxy(args[1], args[2]);
           break;
 
-        case 'test':
+        case "test":
           if (args.length < 2) {
             console.error("❌ 用法: test <proxyUrl>");
             return;
@@ -356,7 +392,7 @@ Twitter监控系统 - 代理配置管理工具
           await this.testProxy(args[1]);
           break;
 
-        case 'clear':
+        case "clear":
           if (args.length < 2) {
             console.error("❌ 用法: clear <accountId>");
             return;
@@ -364,8 +400,20 @@ Twitter监控系统 - 代理配置管理工具
           await this.clearProxy(args[1]);
           break;
 
-        case 'clear-all':
+        case "clear-all":
           await this.clearAllProxy();
+          break;
+
+        case "convert":
+          if (args.length < 2) {
+            console.error("❌ 用法: convert <proxyString>");
+            return;
+          }
+          await this.convertProxy(args[1]);
+          break;
+
+        case "examples":
+          await this.showExamples();
           break;
 
         default:
@@ -381,7 +429,7 @@ Twitter监控系统 - 代理配置管理工具
 
 // 运行CLI
 const cli = new ProxyManagerCLI();
-cli.run().catch(error => {
+cli.run().catch((error) => {
   console.error("❌ CLI运行失败:", error.message);
   process.exit(1);
 });
