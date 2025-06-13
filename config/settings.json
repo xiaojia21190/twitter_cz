@@ -33,7 +33,7 @@
   },
   "puppeteer": {
     "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-    "headless": true,
+    "headless": false,
     "timeout": 50000,
     "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-blink-features=AutomationControlled", "--disable-gpu", "--disable-dev-shm-usage", "--no-first-run", "--no-zygote", "--start-maximized", "--use-gl=swiftshader", "--disable-gl-drawing-for-tests"]
   }
