@@ -1,0 +1,40 @@
+{
+  "openai": {
+    "proxy_url": "https://free.yunwu.ai/v1",
+    "api_key": "sk-rxC2eIlJA6Vt8MEhrzGYwoy3nTDS1d5HHuYJGxRbowQ",
+    "model": "gpt-4o-mini",
+    "max_tokens": 280,
+    "temperature": 0.7
+  },
+  "monitoring": {
+    "tweet_url_regex": "https?://(?:[\\w\\.-]+\\.)?(?:twitter\\.com|x\\.com)/\\w+/status/(\\d+)",
+    "processed_tweets_file": "data/processed_tweets.json",
+    "max_processed_tweets_cache": 10000,
+    "retry_attempts": 3,
+    "retry_delay": 5000,
+    "link_extractor": {
+      "base_url": "https://x.com",
+      "enable_relative_path_extraction": true,
+      "dom_selector": "[role=\"link\"] a",
+      "relative_path_regex": "^\\/([^\\/]+)\\/status\\/(\\d+)",
+      "max_extractions_per_notification": 50
+    }
+  },
+  "notifications": {
+    "filter_keywords": ["群聊", "group", "dm", "私信"],
+    "ignore_own_tweets": true,
+    "min_tweet_age_seconds": 60
+  },
+  "logging": {
+    "level": "info",
+    "file": "logs/twitter-monitor.log",
+    "max_file_size": "10MB",
+    "max_files": 5
+  },
+  "puppeteer": {
+    "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "headless": true,
+    "timeout": 50000,
+    "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-blink-features=AutomationControlled", "--disable-gpu", "--disable-dev-shm-usage", "--no-first-run", "--no-zygote", "--start-maximized", "--use-gl=swiftshader", "--disable-gl-drawing-for-tests"]
+  }
+}

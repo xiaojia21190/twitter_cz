@@ -1,0 +1,81 @@
+{
+  "groupMonitorAccounts": [
+    {
+      "id": "group_monitor_1",
+      "authToken": "08a67be758cf415da83bfb43f6c36ce42a1621c6",
+      "description": "主要群组监控账号",
+      "type": "group_monitor",
+      "enabled": true,
+      "polling_interval": 60000,
+      "features": ["notifications", "group_activity", "timeline_monitoring"],
+      "groupMessageUrl": "https://x.com/messages/1933360709339131974",
+      "groupName": "主要交流群",
+      "priority": 1,
+      "saveEnhancedToken": true,
+      "proxyUrl": "http://127.0.0.1:7890"
+    }
+    // {
+    //   "id": "group_monitor_2",
+    //   "authToken": "your_second_group_token_here",
+    //   "description": "第二个群组监控账号",
+    //   "type": "group_monitor",
+    //   "enabled": true,
+    //   "polling_interval": 90000,
+    //   "features": ["notifications", "group_activity"],
+    //   "groupMessageUrl": "https://x.com/messages/your_second_group_id",
+    //   "groupName": "备用交流群",
+    //   "priority": 2,
+    //   "saveEnhancedToken": true
+    // },
+    // {
+    //   "id": "group_monitor_3",
+    //   "authToken": "your_third_group_token_here",
+    //   "description": "第三个群组监控账号",
+    //   "type": "group_monitor",
+    //   "enabled": false,
+    //   "polling_interval": 120000,
+    //   "features": ["notifications"],
+    //   "groupMessageUrl": "https://x.com/messages/your_third_group_id",
+    //   "groupName": "测试群组",
+    //   "priority": 3,
+    //   "saveEnhancedToken": true
+    // }
+  ],
+  "accounts": [
+    {
+      "id": "account_1",
+      "authToken": "3c51f77a3a78f70a64290ce7634b2d8a64ae4dd5",
+      "enabled": true,
+      "polling_interval": 30000,
+      "proxyUrl": "http://127.0.0.1:7890"
+    },
+    {
+      "id": "account_2",
+      "authToken": "a1b4f4b76fea145e5c9b72f2e7239d33cf847ffa",
+      "enabled": true,
+      "polling_interval": 35000,
+      "proxyUrl": "http://127.0.0.1:7890"
+    },
+    {
+      "id": "account_3",
+      "authToken": "df65be509f133539625f98185585ad1cb1753280",
+      "enabled": true,
+      "polling_interval": 40000,
+      "proxyUrl": "http://127.0.0.1:7890"
+    },
+    {
+      "id": "account_4",
+      "authToken": "7789e48cda322a353eb32f8e52502a1b8a6cec9c",
+      "enabled": true,
+      "polling_interval": 45000,
+      "proxyUrl": "http://127.0.0.1:7890"
+    },
+    {
+      "id": "account_5",
+      "authToken": "5232798d2611af471206ef40e9fd59c7bd42941e",
+      "enabled": true,
+      "polling_interval": 50000,
+      "proxyUrl": "http://127.0.0.1:7890"
+    }
+  ]
+}

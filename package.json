@@ -1,0 +1,54 @@
+{
+  "name": "twitter-monitor",
+  "version": "1.0.0",
+  "description": "Twitter DM group monitoring system with AI auto-reply",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node src/test.js",
+    "test:enhanced": "node src/test-enhanced-auth.js",
+    "test:puppeteer": "node src/test-puppeteer.js",
+    "accounts": "node src/cli/account-manager.js",
+    "accounts:list": "node src/cli/account-manager.js list",
+    "accounts:backup": "node src/cli/account-manager.js backup",
+    "groups": "node src/cli/account-manager.js group-list",
+    "groups:list": "node src/cli/account-manager.js group-list",
+    "groups:add": "node src/cli/account-manager.js group-add",
+    "proxy": "node src/cli/proxy-manager.js",
+    "proxy:list": "node src/cli/proxy-manager.js list",
+    "proxy:set-all": "node src/cli/proxy-manager.js set-all",
+    "proxy:test": "node src/cli/proxy-manager.js test",
+    "chrome": "node src/cli/chrome-setup.js",
+    "chrome:detect": "node src/cli/chrome-setup.js detect",
+    "chrome:auto": "node src/cli/chrome-setup.js auto",
+    "chrome:config": "node src/cli/chrome-setup.js config",
+    "setup": "node src/cli/setup-check.js",
+    "setup:fix": "node src/cli/setup-check.js --fix",
+    "setup:auto": "node src/cli/setup-check.js --auto-fix"
+  },
+  "keywords": [
+    "twitter",
+    "monitoring",
+    "ai",
+    "rettiwt",
+    "automation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "fs-extra": "^11.2.0",
+    "node-cron": "^3.0.3",
+    "puppeteer-core": "^24.10.1",
+    "rettiwt-api": "^5.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
